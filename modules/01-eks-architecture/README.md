@@ -1,183 +1,83 @@
-# Module 01: EKS Architecture & Planning
+# Module 01: EKS Architecture and Planning
 
 | | |
 |---|---|
-| **Time** | 3-5 hours |
-| **Difficulty** | Beginner |
-| **Prerequisites** | Docker installed, basic terminal knowledge |
+| **Time** | 4 hours |
+| **Difficulty** | Intermediate |
 
 ---
 
 ## Learning Objectives
 
-By the end of this module, you will be able to:
-
-- Understand the core concepts of EKS Architecture & Planning
-- Set up and configure the required tools and environments
-- Complete hands-on exercises that demonstrate practical skills
-- Apply these skills in real-world scenarios
-- Pass the module validation to prove your understanding
+- Understand EKS architecture (control plane, data plane, networking)
+- Plan VPC CIDR ranges, subnet strategy, and AZ distribution
+- Choose between managed node groups, Fargate, and self-managed nodes
+- Understand EKS pricing model
 
 ---
 
 ## Concepts
 
-### What is EKS Architecture & Planning?
+### EKS Architecture
 
-EKS Architecture & Planning is a fundamental component of EKS Production Ready: Zero to Hero. In production environments, this skill is used daily by engineers to build, deploy, and maintain reliable systems.
+```
+┌─────────────────────────────────────┐
+│           AWS Managed               │
+│  ┌──────────────────────────────┐   │
+│  │     EKS Control Plane        │   │
+│  │  API Server  etcd  Scheduler │   │
+│  │  (Multi-AZ, auto-scaled)     │   │
+│  └──────────────┬───────────────┘   │
+└─────────────────┼───────────────────┘
+                  │ ENI (in your VPC)
+┌─────────────────┼───────────────────┐
+│   Your VPC      │                   │
+│  ┌──────┐  ┌──────┐  ┌──────┐      │
+│  │Node 1│  │Node 2│  │Node 3│      │
+│  │ AZ-a │  │ AZ-b │  │ AZ-c │      │
+│  └──────┘  └──────┘  └──────┘      │
+│  Private Subnets (workloads)        │
+│                                     │
+│  ┌──────┐  ┌──────┐  ┌──────┐      │
+│  │ ALB  │  │ NAT  │  │ NAT  │      │
+│  │      │  │ GW   │  │ GW   │      │
+│  └──────┘  └──────┘  └──────┘      │
+│  Public Subnets (load balancers)    │
+└─────────────────────────────────────┘
+```
 
-**Real-world analogy:** Think of EKS Architecture & Planning like learning to read a map before navigating a city. Once you understand the fundamentals, you can find your way through any complex system.
+### Node Type Comparison
 
-### Why Does This Matter?
-
-Companies like Google, Netflix, Amazon, and Meta rely on these practices to:
-- Deploy thousands of times per day
-- Maintain 99.99% uptime
-- Scale to millions of users
-- Recover from failures in minutes
-
-### Key Terminology
-
-| Term | Definition |
-|---|---|
-| **Core concept 1** | The foundational building block of this module |
-| **Core concept 2** | How components interact and communicate |
-| **Core concept 3** | The pattern used for reliability and scale |
-| **Best practice** | The industry-standard approach to implementation |
+| Type | Best For | Management |
+|---|---|---|
+| Managed Node Groups | General workloads | AWS manages AMI updates |
+| Fargate | Serverless, batch jobs | No nodes to manage |
+| Karpenter | Cost optimization | Auto-provisions optimal instances |
 
 ---
 
 ## Hands-On Lab
 
-### Prerequisites Check
-
-Before starting, verify your environment:
+### Exercise 1: Review the Terraform Configuration
 
 ```bash
-# Check Docker is running
-docker --version
-docker compose version
-
-# Check you have the project cloned
-ls modules/01-eks-architecture/
+cd terraform/
+cat main.tf           # Main configuration
+cat variables.tf      # Input variables
+cat modules/vpc/main.tf  # VPC with public/private subnets
+cat modules/eks/main.tf  # EKS cluster and node groups
 ```
 
-### Exercise 1: Setup and Configuration
+### Exercise 2: Plan the Deployment
 
-**Goal:** Get the foundation in place for this module.
-
-**Step 1:** Review the starter files
 ```bash
-ls modules/01-eks-architecture/lab/starter/
-```
+# Initialize Terraform
+terraform init
 
-**Step 2:** Set up the required environment
-```bash
-# Follow the specific setup for this module
-# Each command is explained below
-cd modules/01-eks-architecture/lab/starter/
-```
+# See what would be created (dry run)
+terraform plan
 
-**Step 3:** Verify the setup
-```bash
-# Run the validation to check your setup
-bash modules/01-eks-architecture/validation/validate.sh
-```
-
-**What you should see:** The validation script will show PASS for setup-related checks.
-
-### Exercise 2: Core Implementation
-
-**Goal:** Implement the main concept of this module.
-
-Follow the detailed instructions in the starter directory. The solution directory contains the reference implementation if you get stuck.
-
-**Key points:**
-- Read each instruction carefully before executing
-- Understand WHY each step is needed, not just WHAT to do
-- If something fails, check the troubleshooting section below
-
-### Exercise 3: Integration and Testing
-
-**Goal:** Connect this module's work with the broader system.
-
-- Verify your implementation works with previous modules
-- Run all tests and validation scripts
-- Document what you learned
-
----
-
-## Starter Files
-
-Check `lab/starter/` for:
-- Configuration templates to fill in
-- Skeleton code to complete
-- Setup scripts to run
-
-## Solution Files
-
-If you get stuck, `lab/solution/` contains:
-- Complete working configuration
-- Fully implemented code
-- Expected output examples
-
-> **Important:** Try to complete the exercises yourself first! Looking at solutions too early reduces learning.
-
----
-
-## Common Mistakes
-
-| Mistake | Symptom | Fix |
-|---|---|---|
-| Skipping prerequisites | Module exercises fail | Complete previous modules first |
-| Copy-pasting without understanding | Cannot troubleshoot issues | Read explanations, not just commands |
-| Not checking validation | Think you are done but are not | Run validate.sh after each exercise |
-| Ignoring error messages | Problems compound | Read errors carefully, they tell you what is wrong |
-
----
-
-## Self-Check Questions
-
-Test your understanding before moving on:
-
-1. What is the main purpose of EKS Architecture & Planning?
-2. How does this connect to the previous module?
-3. What would happen in production without this?
-4. Can you explain this concept to a non-technical person?
-5. What are three things that could go wrong, and how would you fix them?
-
----
-
-## You Know You Have Completed This Module When...
-
-- [ ] All exercises completed
-- [ ] Validation script passes: `bash modules/01-eks-architecture/validation/validate.sh`
-- [ ] You can explain the concepts without looking at notes
-- [ ] You understand how this applies to real-world scenarios
-- [ ] Self-check questions answered confidently
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**Issue: Validation script fails**
-- Re-read the exercise instructions
-- Check that Docker containers are running
-- Verify you are in the correct directory
-- Compare your work with the solution files
-
-**Issue: Docker container not starting**
-```bash
-docker compose logs <service-name>  # Check logs
-docker compose down && docker compose up -d  # Restart
-```
-
-**Issue: Permission denied**
-```bash
-chmod +x validation/validate.sh  # Make script executable
-sudo chown -R $USER .           # Fix ownership (Linux)
+# Review the plan output - understand every resource
 ```
 
 ---
